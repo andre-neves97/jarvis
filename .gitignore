@@ -1,0 +1,25 @@
+# Secrets
+.env
+.env.*
+
+# Per-machine config (see README) and runtime logs
+jarvis.config.json
+*.log
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# OS / editor
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/
