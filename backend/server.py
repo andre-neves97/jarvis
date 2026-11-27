@@ -313,8 +313,6 @@ if DIST.exists():
 
 
 if __name__ == "__main__":
-    if not KB.exists():
-        raise SystemExit(f"Knowledge base folder not found: {KB}\nSet kb_path in jarvis.config.json")
     print(f"Jarvis: knowledge base {KB}")
     print(f"Jarvis: agent {agent.label()} ({'found' if agent.available() else 'not found'})")
     print(f"Jarvis: open http://{CONFIG['host']}:{CONFIG['port']}")

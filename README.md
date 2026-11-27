@@ -10,10 +10,19 @@ Then it opens http://127.0.0.1:8765. It only listens on your own machine.
 
 ## One config per machine
 
-`jarvis.config.json` sits next to this README and is not synced with the knowledge base:
+The knowledge base folder must be set in `.env` next to this README (not committed):
+
+```
+JARVIS_KB=C:/Users/<you>/OneDrive/Knowledge Base
+```
+
+This is the only place Jarvis takes it from: there is no default, and Jarvis won't start without it.
+A relative path is resolved from the app folder.
+
+Other settings go in `jarvis.config.json` next to this README (optional, not synced with the knowledge base):
 
 ```json
-{ "kb_path": "C:/Users/<you>/OneDrive/Knowledge Base", "agent": "claude" }
+{ "agent": "claude" }
 ```
 
 - `agent`: `"claude"` (Claude Code), `"copilot"` (GitHub Copilot CLI) or `"none"` (manual review only).
@@ -25,7 +34,6 @@ Give the exact command, with `{prompt}` where the task goes, and a name for the 
 
 ```json
 {
-  "kb_path": "../Knowledge Base",
   "agent": "myagent",
   "agent_command": ["myagent", "--non-interactive", "{prompt}"],
   "agent_label": "My Agent"
