@@ -77,7 +77,8 @@ export function bootSequence() {
       queue = queue.then(async () => {
         if (dismissed) return;
         log.append(h("div", { class: `boot-line is-${state}` },
-          h("span", { class: "boot-label" }, label), h("span", { class: "boot-dots" }), h("span", { class: "boot-value" }, value)));
+          h("span", { class: "boot-chev" }, "›"), h("span", { class: "boot-label" }, label), h("span", { class: "boot-fill" }, h("span", { class: "boot-dots" }), h("span", { class: "boot-value" }, value)),
+          h("span", { class: "boot-dot" })));
         await new Promise((r) => setTimeout(r, 600));
       });
     },

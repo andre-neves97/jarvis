@@ -9,12 +9,12 @@ import "./styles.css";
 import { api } from "./api.js";
 import { Workspace } from "./workspace.js";
 import { NoteView } from "./noteView.js";
-import { TodoView } from "./todoView.js";
+import { TodoView, parseTodos } from "./todoView.js";
 import { ReviewSession } from "./review.js";
 import { NotesPanel, SearchPanel, InboxPanel } from "./sidebar.js";
 import { HomeView } from "./home.js";
 import { bootSequence } from "./boot.js";
-import { h, stem, store, debounce, toast } from "./util.js";
+import { h, stem, store, debounce, toast, daysFromToday } from "./util.js";
 
 const sidebar = document.getElementById("sidebar");
 let info = { agent: "none", agent_label: "agent", agent_available: false, todo_file: "todo.md" };
@@ -39,7 +39,7 @@ function openTodo(opts = {}) {
 }
 
 const activePath = () => ws.activeView()?.path ?? null;
-const notes = new NotesPanel({ open: openNote, activePath, openInbox: () => setMode("inbox") });
+const notes = new NotesPanel({ open: openNote, activePath });
 const search = new SearchPanel({ open: openNote });
 let inbox;
 
@@ -114,6 +114,14 @@ function listen() {
   };
 }
 
+// ---------- rail labels ----------
+
+// Each rail icon gets a label that slides out on hover or keyboard focus (its aria-label already names it).
+for (const b of document.querySelectorAll(".rail-btn[data-tip]")) {
+  b.append(h("span", { class: "rail-tip", "aria-hidden": "true" },
+    h("span", { class: "rail-tip-label" }, b.dataset.tip), b.dataset.key ? h("kbd", {}, b.dataset.key) : null));
+}
+
 // ---------- theme ----------
 
 const themeBtn = document.getElementById("theme-btn");
@@ -122,7 +130,7 @@ function setTheme(theme) {
   if (dark) document.documentElement.dataset.theme = "dark";
   else delete document.documentElement.dataset.theme;
   themeBtn.setAttribute("aria-pressed", String(dark));
-  themeBtn.title = `${dark ? "Light" : "Dark"} mode (Ctrl+Shift+L)`;
+  themeBtn.querySelector(".rail-tip-label").textContent = `${dark ? "Light" : "Dark"} mode`;
   themeBtn.setAttribute("aria-label", `${dark ? "Light" : "Dark"} mode`);
   store.set("theme", dark ? "dark" : "light");
 }
@@ -164,11 +172,16 @@ window.addEventListener("beforeunload", () => { for (const t of ws.allTabs()) t.
   inbox = new InboxPanel({
     info, open: openNote, startReview,
     onCount: (n) => { const b = document.getElementById("inbox-badge"); b.hidden = !n; b.textContent = n; },
-    onLoad: (items) => { notes.setStatus(items); setLamp(items); },
+    onLoad: (items) => setLamp(items),
   });
   await notes.load();
-  const count = notes.items.filter((i) => i.type === "file" && i.ext === ".md" && !i.path.startsWith("Archive/")).length;
-  seq.line("Knowledge base", `${count} notes`);
+  try {
+    const open = parseTodos((await api.read(info.todo_file)).content).tasks.filter((t) => !t.checked);
+    const overdue = open.filter((t) => t.due && daysFromToday(t.due) < 0).length;
+    seq.line("To-do", open.length ? `${open.length} open${overdue ? `, ${overdue} overdue` : ""}` : "clear", overdue ? "bad" : "ok");
+  } catch (e) {
+    seq.line("To-do", e.status === 404 ? "no list yet" : "unavailable", e.status === 404 ? "ok" : "bad");
+  }
   setMode(store.get("mode", "notes"));
   await inbox.load().catch(() => {});
   const fresh = inbox.items.filter((i) => i.status === "new").length;

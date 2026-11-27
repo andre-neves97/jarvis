@@ -12,6 +12,24 @@ function greeting() {
 
 const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 
+/** The living background: blurred light drifting on out-of-step loops, and a faint ring cluster turning. */
+function aurora() {
+  const rings = h("span", {
+    class: "aurora-rings",
+    html: `<svg viewBox="-200 -200 400 400">
+      <circle class="ar ar-ticks" r="190"/>
+      <circle class="ar ar-1" r="168" pathLength="360"/>
+      <circle class="ar ar-2" r="140" pathLength="360"/>
+      <circle class="ar ar-3" r="104"/>
+      <circle class="ar ar-4" r="76" pathLength="360"/>
+    </svg>`,
+  });
+  return h("div", { class: "home-aurora", "aria-hidden": "true" },
+    h("span", { class: "blob blob-1" }), h("span", { class: "blob blob-2" }),
+    h("span", { class: "blob blob-3" }), h("span", { class: "blob blob-4" }),
+    rings);
+}
+
 /** Home: a greeting, one sentence on what needs you, and a chat bar to ask about your notes. */
 export class HomeView {
   constructor({ info, openNote, openTodo, openInbox, startReview }) {
@@ -43,6 +61,7 @@ export class HomeView {
     const today = new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
     this.el = h("div", { class: "view home-view" },
       h("div", { class: "home-desk" },
+        aurora(),
         h("div", { class: "home-scroll" },
           h("div", { class: "home-column" },
             h("header", { class: "home-hero" },

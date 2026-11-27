@@ -89,6 +89,22 @@ export class Workspace {
     this.onChange();
   }
 
+  /** Split with one side emptied (tabs moved or closed): fold back into one view, keeping the tab you were on. */
+  _unsplitIfOneSided() {
+    if (!this.split || (this.panes[0].tabs.length && this.panes[1].tabs.length)) return false;
+    const [left, right] = this.panes;
+    const keep = right.tabs.length ? right.active : left.active;
+    this.split = false;
+    store.set("split", false);
+    for (const t of [...right.tabs]) this._transfer(1, 0, t.key);
+    left.active = keep ?? left.active;
+    this.activePane = 0;
+    this._render();
+    left.tabs.find((t) => t.key === left.active)?.view.onShow?.();
+    this.onChange();
+    return true;
+  }
+
   /** spec: { key, title, kind, create: () => view }  opts: { pane, other } */
   open(spec, opts = {}) {
     let pane = opts.pane ?? (opts.other ? 1 - this.activePane : this.activePane);
@@ -126,6 +142,7 @@ export class Workspace {
     tab.view.el.remove();
     p.tabs.splice(i, 1);
     if (p.active === key) p.active = p.tabs[Math.min(i, p.tabs.length - 1)]?.key ?? null;
+    if (this._unsplitIfOneSided()) return;
     this._renderPane(p);
     if (p.active) this.activate(pane, p.active);
     this.onChange();
@@ -137,6 +154,7 @@ export class Workspace {
       p.tabs = p.tabs.filter((x) => x !== t);
       if (p.active === t.key) p.active = p.tabs[0]?.key ?? null;
     }
+    if (this._unsplitIfOneSided()) return;
     this.refreshTabs();
     for (const p of this.panes) if (p.active) p.tabs.find((t) => t.key === p.active)?.view.onShow?.();
     this.onChange();
@@ -160,6 +178,7 @@ export class Workspace {
     if (!this.split) { this.setSplit(true); }
     this._transfer(from, 1 - from, key);
     this.activePane = 1 - from;
+    if (this._unsplitIfOneSided()) return;
     this.refreshTabs();
     this.panes[1 - from].tabs.find((t) => t.key === key)?.view.onShow?.();
     this.onChange();

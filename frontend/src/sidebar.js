@@ -4,10 +4,8 @@ import { h, fill, stem, basename, dirname, store, debounce, captureTitle, toast 
 // ---------- Notes tree ----------
 
 export class NotesPanel {
-  constructor({ open, activePath, openInbox }) {
+  constructor({ open, activePath }) {
     this.open = open;
-    this.openInbox = openInbox;
-    this.status = h("button", { class: "side-status", type: "button", hidden: true, onclick: () => this.openInbox?.() });
     this.activePath = activePath;
     this.items = [];
     this.expanded = new Set(store.get("expanded", null) ?? []);
@@ -26,25 +24,7 @@ export class NotesPanel {
         ),
       ),
       h("div", { class: "side-scroll" }, this.treeEl),
-      h("div", { role: "status", class: "side-status-wrap" }, this.status),
     );
-  }
-
-  /** One quiet line saying what Jarvis is doing with the inbox. */
-  setStatus(items) {
-    const count = (s) => items.filter((i) => s.includes(i.status)).length;
-    const busy = count(["running", "queued"]), ready = count(["review"]), fresh = count(["new"]);
-    const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
-    let state, title, sub;
-    if (busy) [state, title, sub] = ["busy", `Jarvis is working through ${plural(busy, "capture", "captures")}.`, "Proposals will wait in the Inbox."];
-    else if (ready) [state, title, sub] = ["ready", `${plural(ready, "proposal is", "proposals are")} ready for you.`, "Open the Inbox to review."];
-    else if (fresh) [state, title, sub] = ["idle", `${plural(fresh, "capture is", "captures are")} waiting in the Inbox.`, "Nothing has been processed yet."];
-    else [state, title, sub] = ["clear", "All caught up.", null];
-    this.status.hidden = false;
-    this.status.dataset.state = state;
-    this.status.title = state === "clear" ? "" : "Open the Inbox";
-    fill(this.status, h("span", { class: "status-lamp", "aria-hidden": "true" }),
-      h("span", {}, h("strong", {}, title), sub ? h("span", { class: "side-status-sub" }, sub) : null));
   }
 
   async load() {
@@ -85,8 +65,8 @@ export class NotesPanel {
                 this.targetDir = item.path;
                 this.saveExpanded(); this.render();
               },
-            }, h("span", { class: "chev", "aria-hidden": "true" }), basename(item.path), h("span", { class: "tree-count" }, countFiles(item.path))),
-            isOpen ? h("div", { role: "group" }, kids.length ? build(item.path, depth + 1)
+            }, h("span", { class: "chev", "aria-hidden": "true" }), h("span", { class: "tree-icon", "aria-hidden": "true" }), basename(item.path), h("span", { class: "tree-count" }, countFiles(item.path))),
+            isOpen ? h("div", { role: "group", class: "tree-children", style: `--depth:${depth}` }, kids.length ? build(item.path, depth + 1)
               : h("p", { class: "tree-empty", style: `--depth:${depth + 1}` }, "Empty folder")) : null);
         }
         return this.fileRow(item, depth, active);
@@ -102,7 +82,7 @@ export class NotesPanel {
       role: "treeitem", title: isText ? `${item.path}\nCtrl+click opens on the other side` : `${item.path} (Jarvis only opens notes)`,
       onclick: (e) => { this.targetDir = dirname(item.path); if (isText) this.open(item.path, { other: e.ctrlKey || e.metaKey }); },
       onauxclick: (e) => { if (e.button === 1 && isText) this.open(item.path, { other: true }); },
-    }, label || (isText ? stem(item.path) : basename(item.path)));
+    }, h("span", { class: "tree-icon", "aria-hidden": "true" }), h("span", { class: "tree-label" }, label || (isText ? stem(item.path) : basename(item.path))));
   }
 
   /** Inline form for a new note ("note") or folder ("folder"), prefilled with the target folder. */

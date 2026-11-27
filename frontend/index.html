@@ -15,28 +15,28 @@
   <body>
     <div id="app">
       <nav class="rail" aria-label="Sections">
-        <button class="rail-btn" data-mode="home" title="Home" aria-label="Home">
+        <button class="rail-btn" data-mode="home" data-tip="Home" aria-label="Home">
           <svg viewBox="0 0 24 24"><path d="M4.5 10.5 12 4.5l7.5 6V19a1 1 0 0 1-1 1H15v-5.5H9V20H5.5a1 1 0 0 1-1-1z"/></svg>
         </button>
-        <button class="rail-btn" data-mode="notes" title="Notes (Ctrl+1)" aria-label="Notes">
+        <button class="rail-btn" data-mode="notes" data-tip="Notes" data-key="Ctrl+1" aria-label="Notes">
           <svg viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H10l2 2h6.5A1.5 1.5 0 0 1 20 7.5v11a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5z"/></svg>
         </button>
-        <button class="rail-btn" data-mode="search" title="Search (Ctrl+K)" aria-label="Search">
+        <button class="rail-btn" data-mode="search" data-tip="Search" data-key="Ctrl+K" aria-label="Search">
           <svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/></svg>
         </button>
-        <button class="rail-btn" data-mode="inbox" title="Inbox (Ctrl+2)" aria-label="Inbox">
+        <button class="rail-btn" data-mode="inbox" data-tip="Inbox" data-key="Ctrl+2" aria-label="Inbox">
           <svg viewBox="0 0 24 24"><path d="M4 13h4.5l1.5 2.5h4l1.5-2.5H20"/><path d="M6.5 5h11L20 13v5.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5V13z"/></svg>
           <span class="rail-badge" id="inbox-badge" hidden></span>
         </button>
-        <button class="rail-btn" data-mode="todo" title="To-do (Ctrl+3)" aria-label="To-do">
+        <button class="rail-btn" data-mode="todo" data-tip="To-do" data-key="Ctrl+3" aria-label="To-do">
           <svg viewBox="0 0 24 24"><path d="m5 7 2 2 3.5-3.5M5 15l2 2 3.5-3.5M14 8h6M14 16h6"/></svg>
         </button>
         <div class="rail-spacer"></div>
-        <button class="rail-btn theme-btn" id="theme-btn" title="Dark mode (Ctrl+Shift+L)" aria-label="Dark mode" aria-pressed="false">
+        <button class="rail-btn theme-btn" id="theme-btn" data-tip="Dark mode" data-key="Ctrl+Shift+L" aria-label="Dark mode" aria-pressed="false">
           <svg class="icon-moon" viewBox="0 0 24 24"><path d="M19.5 14.5A7.5 7.5 0 0 1 9.5 4.5a7.5 7.5 0 1 0 10 10z"/></svg>
           <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v1.5M12 19.5V21M3 12h1.5M19.5 12H21M5.6 5.6l1.1 1.1M17.3 17.3l1.1 1.1M5.6 18.4l1.1-1.1M17.3 6.7l1.1-1.1"/></svg>
         </button>
-        <button class="rail-btn" id="split-btn" title="Split view (Ctrl+\)" aria-label="Toggle split view">
+        <button class="rail-btn" id="split-btn" data-tip="Split view" data-key="Ctrl+\" aria-label="Toggle split view">
           <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="1.5"/><path d="M12 5v14"/></svg>
         </button>
       </nav>
