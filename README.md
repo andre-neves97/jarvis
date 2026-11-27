@@ -45,6 +45,19 @@ The agent runs in the knowledge base folder and is told to read a `TASK.md` file
 give other agents the equivalent if they look for a different file). Whatever the agent does,
 Jarvis undoes direct edits to your notes and turns them into proposals, so nothing is saved without review.
 
+## Home and chat
+
+Home greets you with one sentence on what needs you (to-dos, proposals to review, captures to process)
+and a chat bar. Ask anything about your notes: Jarvis searches and reads them, shows which notes it read,
+and links them in its answer. Chat is read-only: Claude Code only gets Read, Glob and Grep.
+
+Optional settings in `jarvis.config.json`:
+
+- `chat_model`: model for chat, e.g. `"sonnet"` (default: your Claude Code default).
+- `chat_effort`: `"low"` (default, fastest) up to `"max"`.
+- `chat_command`: chat with another agent, e.g. `["myagent", "{prompt}"]`. It gets the conversation in its prompt;
+  make sure it can't write files.
+
 ## How a review works
 
 1. Inbox → **Process with <your agent>**. The agent writes its proposal into `.jarvis/staging/<capture>/`

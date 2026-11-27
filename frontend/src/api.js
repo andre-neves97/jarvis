@@ -17,6 +17,31 @@ async function call(method, url, body) {
 
 const q = (o) => new URLSearchParams(o).toString();
 
+/** Streams a chat answer: calls onEvent for each {type: session|tool|text|done|error} event. */
+export async function chat(body, onEvent, signal) {
+  const res = await fetch("/api/chat", {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), signal,
+  });
+  if (!res.ok) {
+    let detail = `Request failed (${res.status})`;
+    try { detail = (await res.json()).detail || detail; } catch { /* no body */ }
+    throw new Error(detail);
+  }
+  const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+  let buf = "";
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += value;
+    let nl;
+    while ((nl = buf.indexOf("\n")) >= 0) {
+      const line = buf.slice(0, nl).trim();
+      buf = buf.slice(nl + 1);
+      if (line) onEvent(JSON.parse(line));
+    }
+  }
+}
+
 export const api = {
   info: () => call("GET", "/api/info"),
   tree: () => call("GET", "/api/tree"),

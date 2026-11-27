@@ -18,6 +18,7 @@ from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 import agent
+import chat
 import kb
 import review
 from config import APP_DIR, CONFIG, KB
@@ -60,7 +61,7 @@ class WriteBody(BaseModel):
 @app.get("/api/info")
 def info():
     return {"kb": str(KB), "kb_name": KB.name, "agent": agent.name(), "agent_label": agent.label(),
-            "agent_available": agent.available(), "todo_file": CONFIG["todo_file"], "started": STARTED}
+            "agent_available": agent.available(), "chat_available": chat.available(), "todo_file": CONFIG["todo_file"], "started": STARTED}
 
 
 @app.post("/api/shutdown")
@@ -253,6 +254,22 @@ def apply(rid: str, body: ApplyBody):
 def discard(rid: str):
     review.discard(rid)
     return {"ok": True}
+
+
+# ---------- home chat ----------
+
+class ChatBody(BaseModel):
+    message: str
+    session: str | None = None
+    history: list[dict] = []
+
+
+@app.post("/api/chat")
+def ask(body: ChatBody):
+    if not body.message.strip():
+        raise HTTPException(400, "Type a question")
+    return StreamingResponse(chat.ask(body.message.strip(), body.session, body.history),
+                             media_type="application/x-ndjson", headers={"Cache-Control": "no-cache"})
 
 
 # ---------- live file events (server-sent events) ----------

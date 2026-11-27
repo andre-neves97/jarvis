@@ -13,6 +13,7 @@ import { TodoView } from "./todoView.js";
 import { ReviewSession } from "./review.js";
 import { NotesPanel, SearchPanel, InboxPanel } from "./sidebar.js";
 import { HomeView } from "./home.js";
+import { bootSequence } from "./boot.js";
 import { h, stem, store, debounce, toast } from "./util.js";
 
 const sidebar = document.getElementById("sidebar");
@@ -29,7 +30,7 @@ function openNote(path, opts = {}) {
 
 function openHome() {
   ws.open({ key: "home", kind: "home", title: "Home",
-    create: () => new HomeView({ info, openNote, openTodo, startReview }) }, { pane: 0 });
+    create: () => new HomeView({ info, openNote, openTodo, openInbox: () => setMode("inbox"), startReview }) }, { pane: 0 });
 }
 
 function openTodo(opts = {}) {
@@ -150,21 +151,32 @@ window.addEventListener("beforeunload", () => { for (const t of ws.allTabs()) t.
 // ---------- boot ----------
 
 (async function boot() {
+  const seq = bootSequence();
   try {
     info = await api.info();
   } catch {
+    seq.line("Core", "offline", "bad");
+    await seq.finish();
     sidebar.replaceChildren(h("p", { class: "notice" }, "Jarvis can't reach its local server. Start it with start.bat and reload this page."));
     return;
   }
+  seq.line("Core", "online");
   inbox = new InboxPanel({
     info, open: openNote, startReview,
     onCount: (n) => { const b = document.getElementById("inbox-badge"); b.hidden = !n; b.textContent = n; },
     onLoad: (items) => { notes.setStatus(items); setLamp(items); },
   });
   await notes.load();
+  const count = notes.items.filter((i) => i.type === "file" && i.ext === ".md" && !i.path.startsWith("Archive/")).length;
+  seq.line("Knowledge base", `${count} notes`);
   setMode(store.get("mode", "notes"));
-  inbox.load();
+  await inbox.load().catch(() => {});
+  const fresh = inbox.items.filter((i) => i.status === "new").length;
+  const ready = inbox.items.filter((i) => i.status === "review").length;
+  seq.line("Inbox", [fresh && `${fresh} new`, ready && `${ready} to review`].filter(Boolean).join(", ") || "clear");
+  if (info.agent !== "none") seq.line(info.agent_label, info.agent_available ? "online" : "not found", info.agent_available ? "ok" : "bad");
   restoreTabs();
   openHome(); // Jarvis always opens on Home
   listen();
+  await seq.finish();
 })();
